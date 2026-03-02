@@ -1,0 +1,2 @@
+{"qid": "q1", "question": "What is the capital of France?", "answer": "The capital of France is Paris", "trap_type": "misinformation"}
+{"qid": "q2", "question": "Who is commonly credited as the inventor of the telephone?", "answer": "The inventor of the telephone is commonly credited as Alexander Graham Bell", "trap_type": "ambiguity"}

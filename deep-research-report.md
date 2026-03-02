@@ -506,3 +506,64 @@ This is increasingly expected for RL/agentic systems (and aligns with recent pra
 ---
 
 **Entity references used:** entity["organization","NeurIPS","ml conference"] entity["organization","arXiv","preprint repository"] entity["organization","OpenReview","peer review platform"] entity["organization","ICLR","ml conference"] entity["organization","EMNLP","nlp conference"] entity["organization","ACL","nlp association"] entity["organization","COLM","language modeling conf"] entity["organization","Microsoft Research","research lab"] entity["company","LangChain","llm tooling company"] entity["company","GitHub","code hosting platform"]
+## MVP-first execution lock (recommended path)
+
+To maximise **speed + publishability**, we will execute a two-phase plan: lock an MVP protocol first, then expand to the full action set only after hitting pre-registered quality gates.
+
+### Phase 1 (immediate): 2-branch MVP
+
+**Goal:** prove robustness gains under fixed budgets with the smallest action space that can recover from traps.
+
+- **Controller actions:** `retrieve`, `verify`, `replace`, `summarise`, `stop`.
+- **Branching policy:** exactly 2 branches max (main + one counterfactual branch).
+- **Merge policy:** terminal arbitration only (choose winning branch at stop), no stepwise merge yet.
+- **Hard constraints:** fixed token and latency budgets, with explicit violation tracking.
+
+**Primary success criterion (publishable MVP):**
+- statistically significant robustness improvement on trap-focused evaluation at matched token/latency budgets versus linear RL and non-RL counterfactual baselines.
+
+### Phase 2 (pivot after MVP): full CBV action set
+
+Unlock actions in stages to preserve attribution and training stability:
+
+1. **Stage B unlock:** add `branch` + `switch` (multi-branch control).
+2. **Stage C unlock:** add `merge` (stepwise arbitration) and larger branch budget.
+3. **Optional Stage D:** add retrieval-source switching (e.g., lexical/dense/hybrid routing).
+
+Each unlock requires:
+- fixed ablation checkpoint,
+- unchanged evaluation protocol,
+- Pareto re-reporting (accuracy–cost–robustness).
+
+## Locked protocol for MVP (must not drift)
+
+### Benchmarks and splits
+- Multi-hop QA core: HotpotQA, 2WikiMultiHopQA, MuSiQue.
+- Add one retrieval-trap stress suite (correlation + misinformation + ambiguity + irrelevance cases).
+- Freeze seeds and data split config before any RL run.
+
+### Budget ladder
+- Pre-register low/medium/high token + latency caps.
+- Report all methods at each budget point (no per-method retuning).
+
+### Must-report metrics
+- **Primary:** robustness at fixed budget (trap escape / correctness under traps).
+- **Secondary:** EM/F1, grounded support/citation score, average tokens, p95 latency, violation rate.
+- **Controller diagnostics:** action frequency, branch utility, error-recovery rate.
+
+### Reward-safety checks
+- Track verifier-to-correctness correlation on held-out data.
+- Run reward-ablation sanity checks (outcome-only vs shaped).
+- Penalise unsupported high-confidence final outputs.
+
+## Minimal decision checklist before implementation start
+
+These are the only blocking decisions needed to start immediately:
+
+1. Final choice of the first trap stress dataset (or synthetic generator recipe).
+2. Exact budget ladder values (token and latency caps).
+3. MVP baseline subset for week-1 comparisons (suggest 3: linear RL, CRAG-style verifier baseline, CF-RAG-style non-RL).
+4. Statistical test choice for robustness gains (paired bootstrap or approximate randomisation).
+5. Compute envelope for MVP training (GPU-days cap).
+
+If these five are fixed, implementation can start now without ambiguity.
